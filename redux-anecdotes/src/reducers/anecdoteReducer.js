@@ -1,3 +1,5 @@
+import anecdoteService from '../services/anecdotes'
+
 const anecdotesAtStart = [
   'If it hurts, do it more often',
   'Adding manpower to a late software project makes it later!',
@@ -17,35 +19,49 @@ const asObject = (anecdote) => {
   }
 }
 
-const sortByVotes = (a, b) => b.votes - a.votes
-
 const initialState = anecdotesAtStart.map(asObject)
 
-export const addVote = id => ({
-  type: 'VOTE',
-  payload: { id }
-})
+export const addVote = id => {
+  return async (dispatch) => {
+    await anecdoteService.update(id)
+    dispatch({
+      type: 'VOTE',
+      payload: { id }
+    })
+  }
+}
 
-export const addAnecdote = anecdote => ({
-  type: 'ADD',
-  payload: { anecdote }
-})
+export const initAnecdotes = () => {
+  return async (dispatch) => {
+    const anecdotes  = await anecdoteService.getAll()
+    dispatch({
+      type: 'INIT_ANECDOTES',
+      payload: anecdotes
+    })
+  }
+}
 
-const anecdoteReducer = (state = initialState, action) => {
-  console.log('state now: ', state)
+export const addAnecdote = (anecdote) => {
+  return async (dispatch) => {
+    const newAnecdote  = await anecdoteService.create(anecdote)
+    dispatch({
+      type: 'ADD',
+      payload: newAnecdote
+    })
+  }
+}
+
+const anecdoteReducer = (state = [], action) => {
   console.log('action', action)
   switch (action.type) {
+    case 'INIT_ANECDOTES':
+      return action.payload
     case 'VOTE':
       let votedAnecdote = state.find(a => a.id === action.payload.id)
       votedAnecdote.votes = votedAnecdote.votes + 1
-      return state.map(a => a.id !== action.payload.id ? a : votedAnecdote).sort(sortByVotes)
-      case 'ADD':
-        let newAnecdote = {
-          content: action.payload.anecdote,
-          id: getId(),
-          votes: 0
-        }
-        return [...state, newAnecdote]
+      return state.map(a => a.id !== action.payload.id ? a : votedAnecdote)
+    case 'ADD':
+      return [...state, action.payload]
     default:
       return state
   }

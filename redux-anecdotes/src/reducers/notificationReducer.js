@@ -16,6 +16,21 @@ export const resetNotification = () => (
   }
 )
 
+export const setNotification = (msg, secs) => {
+  return (dispatch) => {
+    dispatch({
+      type: 'SET_MESSAGE',
+      payload: { type: 'info', msg }
+    })
+    setTimeout(() => {
+      dispatch({
+        type: 'RESET_MESSAGE'
+      })
+    }, secs * 1000);
+
+  }
+}
+
 const notificationReducer = (state = initialState, action) => {
   switch (action.type) {
     case 'SET_MESSAGE':

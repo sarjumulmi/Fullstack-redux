@@ -1,12 +1,15 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { addAnecdote } from '../reducers/anecdoteReducer'
+import { setNotification } from '../reducers/notificationReducer'
 
-const AnecdoteForm = ({ addAnecdote }) => {
-  const handleNewAnecdote = e => {
+const AnecdoteForm = ({ addAnecdote, setNotification }) => {
+  const handleNewAnecdote = async (e) => {
     e.preventDefault()
-    addAnecdote(e.target.anecdote.value)
+    const content  = e.target.anecdote.value
     e.target.anecdote.value = ''
+    addAnecdote({ content })
+    setNotification(`new anecdote ${content} added`, 3)
   }
   return (
     <div>
@@ -20,7 +23,8 @@ const AnecdoteForm = ({ addAnecdote }) => {
 }
 
 const mapDispatchToProps = {
-  addAnecdote
+  addAnecdote,
+  setNotification
 }
 
 export default connect(null, mapDispatchToProps)(AnecdoteForm)

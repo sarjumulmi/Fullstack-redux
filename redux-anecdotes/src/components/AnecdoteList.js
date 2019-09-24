@@ -1,22 +1,25 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
-import { addVote } from '../reducers/anecdoteReducer'
-import { addNotification, resetNotification } from '../reducers/notificationReducer'
 
-const AnecdoteList = ({ anecdotesToShow, addVote, addNotification, resetNotification }) => {
+import { addVote, initAnecdotes } from '../reducers/anecdoteReducer'
+import { setNotification } from '../reducers/notificationReducer'
+
+const AnecdoteList = ({ anecdotesToShow, addVote, setNotification, initAnecdotes }) => {
+
+  useEffect(() => {
+    initAnecdotes()
+  }, [initAnecdotes])
 
   const handleAddVote = (id) => {
-    console.log('vote', id)
     addVote(id)
-    addNotification(`you voted anecdote #${id}`)
-    setTimeout(() => {
-      resetNotification()
-    }, 5000)
+    setNotification(`you voted anecdote #${id}`, 5)
   }
+
+  const sortByVotes = (a, b) => b.votes - a.votes
 
   return (
     <div>
-      {anecdotesToShow.map(anecdote =>
+      {anecdotesToShow.sort(sortByVotes).map(anecdote =>
         <div key={anecdote.id}>
           <div>
             {anecdote.content}
@@ -30,7 +33,9 @@ const AnecdoteList = ({ anecdotesToShow, addVote, addNotification, resetNotifica
     </div>
   )
 }
+
 const anecdotesToShow = ( { anecdotes, filter }) => {
+  console.log('anecdotes are: ', anecdotes);
   if (filter === null) {
     return anecdotes
   } else {
@@ -44,8 +49,8 @@ const mapStateToProps = ({ anecdotes, filter }) => ({
 
 const mapDispatchToProps = {
   addVote,
-  addNotification,
-  resetNotification
+  setNotification,
+  initAnecdotes
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AnecdoteList)
